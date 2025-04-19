@@ -1,20 +1,9 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Dimensions,
-  Image,
-  KeyboardAvoidingView,
-  TouchableWithoutFeedback,
-  Keyboard,
-  Platform,
-  Alert,
-} from 'react-native';
+import axios from 'axios';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, Image, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 
+// API_URL'yi .env dosyasından almak için process.env kullanıyoruz
 const { width } = Dimensions.get('window');
 
 export default function LoginScreen() {
@@ -22,24 +11,42 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const router = useRouter();
 
-  const handleLogin = () => {
-    const isValidEmail = (email: string) =>
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  
-    if (!email || !isValidEmail(email)) {
-      Alert.alert('Invalid Email', 'Please enter a valid email address.');
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please enter both email and password.');
       return;
     }
-  
-    if (!password) {
-      Alert.alert('Empty Password', 'Please enter your password.');
-      return;
-    }
-  
-    // Eğer validasyon geçtiyse:
-    Alert.alert('Success', 'Login successful!'); // (ya da router.push('/dashboard'))
+
+    try {
+      // API_URL'yi kullanarak login işlemi yapıyoruz
+      const response = await axios.post('http://172.20.10.13:5000/login', {
+        email,
+        password,
+      });
+
+      const data = response.data;
+      console.log('🧠 Backend response:', data);
+
+      if (data.role === 'admin') {
+        router.push('/screen/AdminDashboard');
+      } else if (data.role === 'camp_owner') {
+        router.push('/screen/CampOwnerDashboard');
+      } else if (data.role === 'content_creator') {
+        router.push('/screen/UserDashboard');
+      } else {
+        Alert.alert('Login Error', 'Unknown user role.');
+      }      
+    } catch (error: any) { // error nesnesine any tipi ekledik
+      console.error('Login error:', error);
+      if (error.response) {
+        // Backend hatası varsa
+        Alert.alert('Login Failed', error.response.data.error || 'Invalid credentials or server error.');
+      } else {
+        // Sunucuya ulaşılamadığında
+        Alert.alert('Login Failed', 'Unable to reach the server.');
+      }
+    }    
   };
-  
 
   return (
     <KeyboardAvoidingView
@@ -53,7 +60,6 @@ export default function LoginScreen() {
             style={styles.logo}
             resizeMode="contain"
           />
-
           <Text style={styles.title}>Login</Text>
           <Text style={styles.subtitle}>
             Welcome to <Text style={styles.brand}>Targetly</Text>
