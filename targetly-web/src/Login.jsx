@@ -1,14 +1,41 @@
 import React, { useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // en üste ekle
+
 
 const Login = () => {
+  const navigate = useNavigate(); // useState'lerin altına ekle
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Email:', email);
-    console.log('Password:', password);
+
+    try {
+      const response = await axios.post('http://localhost:5000/login', {
+        email,
+        password
+      });
+
+      const data = response.data;
+      console.log('✅ Login success:', data);
+
+      // Rol kontrolü örneği:
+      if (data.role === 'admin') {
+        navigate('/admin-dashboard');
+      } else if (data.role === 'camp_owner') {
+        navigate('/camp-owner-dashboard');
+      } else if (data.role === 'content_creator') {
+        navigate('/content-creator-dashboard');
+      } else {
+        alert('Tanımsız rol: ' + data.role);
+      }      
+
+    } catch (error) {
+      console.error('❌ Login error:', error);
+      alert('Giriş başarısız: Hatalı bilgi veya sunucu hatası.');
+    }
   };
 
   return (
