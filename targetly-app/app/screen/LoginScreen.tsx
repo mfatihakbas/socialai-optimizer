@@ -1,9 +1,21 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, Image, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+  Image,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  Platform,
+  Alert
+} from 'react-native';
 import { useRouter } from 'expo-router';
 
-// API_URL'yi .env dosyasından almak için process.env kullanıyoruz
 const { width } = Dimensions.get('window');
 
 export default function LoginScreen() {
@@ -18,8 +30,7 @@ export default function LoginScreen() {
     }
 
     try {
-      // API_URL'yi kullanarak login işlemi yapıyoruz
-      const response = await axios.post('http://172.20.10.13:5000/login', {
+      const response = await axios.post('http://10.196.219.159:5000/login', {
         email,
         password,
       });
@@ -29,30 +40,26 @@ export default function LoginScreen() {
 
       if (data.role === 'admin') {
         router.push('/screen/AdminDashboard');
-      } else if (data.role === 'camp_owner') {
-        router.push('/screen/CampOwnerDashboard');
+      } else if (data.role === 'account_manager') {
+        router.push('/screen/AccountManagerDashboard');
       } else if (data.role === 'content_creator') {
-        router.push('/screen/UserDashboard');
+        router.push('/screen/ContentCreatorDashboard');
       } else {
         Alert.alert('Login Error', 'Unknown user role.');
-      }      
-    } catch (error: any) { // error nesnesine any tipi ekledik
+      }
+
+    } catch (error: any) {
       console.error('Login error:', error);
       if (error.response) {
-        // Backend hatası varsa
         Alert.alert('Login Failed', error.response.data.error || 'Invalid credentials or server error.');
       } else {
-        // Sunucuya ulaşılamadığında
         Alert.alert('Login Failed', 'Unable to reach the server.');
       }
-    }    
+    }
   };
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.container}>
           <Image
@@ -94,11 +101,11 @@ export default function LoginScreen() {
             <Text style={styles.buttonText}>Log in</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => { /* router.push('/forgot-password') */ }}>
+          <TouchableOpacity onPress={() => {}}>
             <Text style={styles.linkText}>Forgot Password?</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => { router.push('/screen/SignupScreen')}}>
+          <TouchableOpacity onPress={() => router.push('/screen/SignupScreen')}>
             <Text style={styles.linkText}>Signup !</Text>
           </TouchableOpacity>
         </View>

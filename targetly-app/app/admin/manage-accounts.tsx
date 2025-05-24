@@ -1,44 +1,50 @@
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 
-const dummyCamps = [
-  { id: '1', name: 'Camp Everest', owner: 'John Doe', participants: 150 },
-  { id: '2', name: 'Beach Party Camp', owner: 'Jane Smith', participants: 87 },
+const dummyAccounts = [
+  { id: '1', name: 'Everest Media', manager: 'John Doe', followers: 15000 },
+  { id: '2', name: 'Beach Vibes', manager: 'Jane Smith', followers: 8700 },
 ];
 
-export default function ManageCamps() {
+export default function ManageAccounts() {
   const router = useRouter();
 
   return (
     <View style={styles.container}>
-      {/* Home Button */}
+      {/* Geri Dön Butonu */}
       <TouchableOpacity style={styles.homeButton} onPress={() => router.push('/screen/AdminDashboard')}>
-        <Text style={styles.homeButtonText}>🏠 Home</Text>
+        <Text style={styles.homeButtonText}>🏠 Back to Dashboard</Text>
       </TouchableOpacity>
 
-      <Text style={styles.title}>Manage Camps</Text>
+      <Text style={styles.title}>📱 Manage Accounts</Text>
 
-      {/* Search */}
-      <TextInput style={styles.searchInput} placeholder="Search camps..." />
+      {/* Arama Kutusu */}
+      <TextInput style={styles.searchInput} placeholder="🔍 Search accounts..." />
 
-      {/* Add Camp */}
+      {/* Yeni Hesap Ekle */}
       <TouchableOpacity style={styles.addButton}>
-        <Text style={styles.addButtonText}>➕ Add New Camp</Text>
+        <Text style={styles.addButtonText}>➕ Add New Account</Text>
       </TouchableOpacity>
 
-      {/* Camp List */}
+      {/* Hesap Listesi */}
       <FlatList
-        data={dummyCamps}
+        data={dummyAccounts}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.card}>
             <Text style={styles.cardTitle}>{item.name}</Text>
-            <Text style={styles.cardSubtitle}>Owner: {item.owner}</Text>
-            <Text style={styles.cardParticipants}>Participants: {item.participants}</Text>
+            <Text style={styles.cardSubtitle}>Manager: {item.manager}</Text>
+            <Text style={styles.cardFollowers}>Followers: {item.followers}</Text>
             <View style={styles.cardActions}>
-              <TouchableOpacity style={styles.editButton}><Text>Details</Text></TouchableOpacity>
-              <TouchableOpacity style={styles.editButton}><Text>Edit</Text></TouchableOpacity>
-              <TouchableOpacity style={styles.deleteButton}><Text>Delete</Text></TouchableOpacity>
+              <TouchableOpacity style={styles.editButton}>
+                <Text>📄 Details</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.editButton}>
+                <Text>✏️ Edit</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.deleteButton}>
+                <Text>🗑️ Delete</Text>
+              </TouchableOpacity>
             </View>
           </View>
         )}
@@ -106,7 +112,7 @@ const styles = StyleSheet.create({
     color: '#555',
     marginTop: 2,
   },
-  cardParticipants: {
+  cardFollowers: {
     fontSize: 14,
     marginTop: 5,
     fontWeight: '500',

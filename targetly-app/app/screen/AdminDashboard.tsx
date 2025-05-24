@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 
 const { width } = Dimensions.get('window');
@@ -7,59 +7,67 @@ const { width } = Dimensions.get('window');
 export default function AdminDashboard() {
   const router = useRouter();
 
+  const handleLogout = () => {
+    router.replace('/screen/LoginScreen');;
+  };
+
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        {/* Profil Resmi Yorumda */}
-        {/* 
-        <Image
-          source={require('../../assets/images/profile-placeholder.png')}
-          style={styles.profileImage}
-        /> 
-        */}
         <Text style={styles.greeting}>👋 Welcome back, Admin!</Text>
       </View>
 
       {/* Scrollable Content */}
       <ScrollView showsVerticalScrollIndicator={false}>
-        
         {/* KPI Cards */}
         <View style={styles.kpiContainer}>
-          <View style={styles.kpiCard}><Text style={styles.kpiTitle}>Total Users</Text><Text style={styles.kpiValue}>120</Text></View>
-          <View style={styles.kpiCard}><Text style={styles.kpiTitle}>Total Camps</Text><Text style={styles.kpiValue}>35</Text></View>
-          <View style={styles.kpiCard}><Text style={styles.kpiTitle}>Weekly Growth</Text><Text style={styles.kpiValue}>+8%</Text></View>
-          <View style={styles.kpiCard}><Text style={styles.kpiTitle}>System Health</Text><Text style={styles.kpiValue}>Good ✅</Text></View>
+          <View style={styles.kpiCard}>
+            <Text style={styles.kpiTitle}>Total Accounts</Text>
+            <Text style={styles.kpiValue}>120</Text>
+          </View>
+          <View style={styles.kpiCard}>
+            <Text style={styles.kpiTitle}>Total Posts</Text>
+            <Text style={styles.kpiValue}>35</Text>
+          </View>
+          <View style={styles.kpiCard}>
+            <Text style={styles.kpiTitle}>Avg. Engagement</Text>
+            <Text style={styles.kpiValue}>4.2%</Text>
+          </View>
+          <View style={styles.kpiCard}>
+            <Text style={styles.kpiTitle}>System Status</Text>
+            <Text style={styles.kpiValue}>Good ✅</Text>
+          </View>
         </View>
 
         {/* Content Calendar */}
-        <Text style={styles.sectionTitle}>📅 Content Calendar</Text>
+        <Text style={styles.sectionTitle}>🗓️ Content Calendar</Text>
         <View style={styles.placeholderBox}>
           <Text style={styles.placeholderText}>Content Calendar (Coming soon)</Text>
         </View>
 
-        {/* Campaign Performance */}
-        <Text style={styles.sectionTitle}>📈 Campaign Performance</Text>
+        {/* Insights & Analytics */}
+        <Text style={styles.sectionTitle}>📊 Insights & Analytics</Text>
         <View style={styles.placeholderBox}>
           <Text style={styles.placeholderText}>Graphs and Analytics (Coming soon)</Text>
         </View>
 
         {/* Quick Actions */}
-        <Text style={styles.sectionTitle}>🚀 Quick Actions</Text>
+        <Text style={styles.sectionTitle}>⚡ Quick Actions</Text>
         <View style={styles.quickActionsContainer}>
           <TouchableOpacity style={styles.actionCard} onPress={() => router.push('/admin/manage-users')}>
             <Text style={styles.actionIcon}>👥</Text>
             <Text style={styles.actionLabel}>Manage Users</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionCard} onPress={() => router.push('/admin/manage-camps')}>
-            <Text style={styles.actionIcon}>🏕</Text>
-            <Text style={styles.actionLabel}>Manage Camps</Text>
+          <TouchableOpacity style={styles.actionCard} onPress={() => router.push('/admin/reports')}>
+            <Text style={styles.actionIcon}>📱</Text>
+            <Text style={styles.actionLabel}>Manage Accounts</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.actionCard} onPress={() => router.push('/admin/reports')}>
-             <Text style={styles.actionIcon}>📊</Text>
-              <Text style={styles.actionLabel}>View Reports</Text>
+            <Text style={styles.actionIcon}>📈</Text>
+            <Text style={styles.actionLabel}>View Reports</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.actionCard} onPress={() => router.push('/admin/settings')}>
@@ -68,6 +76,10 @@ export default function AdminDashboard() {
           </TouchableOpacity>
         </View>
 
+        {/* Log out */}
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Text style={styles.logoutText}>🔓 Log out</Text>
+        </TouchableOpacity>
       </ScrollView>
 
       {/* AI Assistant Floating Button */}
@@ -81,7 +93,6 @@ export default function AdminDashboard() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f1f5f9', paddingHorizontal: 20, paddingTop: 50 },
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: 25 },
-  profileImage: { width: 45, height: 45, borderRadius: 22, marginRight: 12, backgroundColor: '#ccc' },
   greeting: { fontSize: 22, fontWeight: '600', color: '#333' },
   kpiContainer: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 25 },
   kpiCard: { backgroundColor: '#fff', width: width * 0.44, height: 90, borderRadius: 12, marginBottom: 15, padding: 10, justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.05, shadowOffset: { width: 0, height: 2 }, shadowRadius: 6, elevation: 3 },
@@ -96,4 +107,18 @@ const styles = StyleSheet.create({
   actionLabel: { fontSize: 14, fontWeight: '600', color: '#333' },
   agentButton: { position: 'absolute', bottom: 25, right: 25, backgroundColor: '#4C7CFF', width: 60, height: 60, borderRadius: 30, justifyContent: 'center', alignItems: 'center', shadowColor: '#000', shadowOpacity: 0.15, shadowOffset: { width: 0, height: 4 }, shadowRadius: 10, elevation: 5 },
   agentIcon: { fontSize: 30, color: '#fff' },
+  logoutButton: {
+    marginTop: 30,
+    marginBottom: 50,
+    alignSelf: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    backgroundColor: '#ddd',
+  },
+  logoutText: {
+    fontSize: 16,
+    color: '#444',
+    fontWeight: '600',
+  },
 });

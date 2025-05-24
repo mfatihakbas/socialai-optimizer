@@ -2,8 +2,16 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from db import get_db_connection
 
+# Blueprint'leri içeri aktar
+from routes.auth_routes import auth_routes
+from routes.user_routes import user_routes
+
 app = Flask(__name__)
 CORS(app)
+
+# Blueprint'leri kaydet
+app.register_blueprint(auth_routes)
+app.register_blueprint(user_routes)
 
 @app.route('/')
 def index():
@@ -13,12 +21,11 @@ def index():
 def db_test():
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT 1;")
-        result = cursor.fetchone()
-        cursor.close()
+        cur = conn.cursor()
+        cur.execute("SELECT version();")
+        version = cur.fetchone()
         conn.close()
-        return f"✅ DB connected successfully. Result: {result}"
+        return f"Connected to PostgreSQL: {version[0]}"
     except Exception as e:
         print("❌ DB error:", e)
         return f"❌ DB connection failed: {str(e)}"
@@ -62,4 +69,3 @@ def login():
 if __name__ == '__main__':
     print("🚀 Flask is starting...")
     app.run(debug=True, host='0.0.0.0', port=5000)
-
