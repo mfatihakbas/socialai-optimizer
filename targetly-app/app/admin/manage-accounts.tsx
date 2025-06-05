@@ -1,55 +1,107 @@
-import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View, Text, TouchableOpacity, StyleSheet, Dimensions, ActivityIndicator,
+  Platform, Alert
+} from 'react-native';
 import { useRouter } from 'expo-router';
+import axios from 'axios';
+import Constants from 'expo-constants';
 
-const dummyAccounts = [
-  { id: '1', name: 'Everest Media', manager: 'John Doe', followers: 15000 },
-  { id: '2', name: 'Beach Vibes', manager: 'Jane Smith', followers: 8700 },
-];
+const { width } = Dimensions.get('window');
 
-export default function ManageAccounts() {
+const getApiBaseUrl = (): string => {
+  const apiUrlFromConfig = Constants.expoConfig?.extra?.apiBaseUrl;
+  if (typeof apiUrlFromConfig === 'string' && apiUrlFromConfig) {
+    return apiUrlFromConfig;
+  }
+  console.warn("API_BASE_URL not found in app.json's extra or is undefined. Please check.");
+  return 'http://YOUR_FALLBACK_URL_OR_THROW_ERROR'; // Güncelleyin!
+};
+const API_BASE_URL = getApiBaseUrl();
+
+type ManagedInstagramAccount = {
+  id: string; // Bu, Instagram'ın User ID'si olmalı
+  name: string; // "TCS Yazılım" gibi bir isim
+  managerName: string | null;
+  creatorName: string | null;
+  instagramUserId?: string; // Backend'den bu da gelebilir veya id ile aynı olabilir
+};
+
+export default function ManageAccountsScreen() {
   const router = useRouter();
+  const [accountInfo, setAccountInfo] = useState<ManagedInstagramAccount | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMainAccountInfo = async () => {
+      if (!API_BASE_URL || API_BASE_URL === 'http://YOUR_FALLBACK_URL_OR_THROW_ERROR') {
+        Alert.alert('Config Error', "API URL not set.");
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      try {
+        // Backend /api/managed-instagram-accounts endpoint'i tek elemanlı bir liste döndürmeli
+        const response = await axios.get(`${API_BASE_URL}/api/managed-instagram-accounts`);
+        if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+          setAccountInfo(response.data[0]); // Listenin ilk (ve tek) elemanını al
+        } else {
+          setAccountInfo(null);
+          console.log("No account data received or data is not an array:", response.data);
+          Alert.alert("Info", "No account information found from server.");
+        }
+      } catch (error: any) {
+        console.error("Error fetching main account info:", error);
+        Alert.alert("Error", `Could not fetch account information. ${error.message || ''}`);
+        setAccountInfo(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMainAccountInfo();
+  }, []);
+
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <ActivityIndicator size="large" color="#007bff" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      {/* Geri Dön Butonu */}
-      <TouchableOpacity style={styles.homeButton} onPress={() => router.push('/screen/AdminDashboard')}>
+      <TouchableOpacity style={styles.homeButton} onPress={() => router.canGoBack() ? router.back() : router.push('/screen/AdminDashboard')}>
         <Text style={styles.homeButtonText}>🏠 Back to Dashboard</Text>
       </TouchableOpacity>
 
-      <Text style={styles.title}>📱 Manage Accounts</Text>
+      <Text style={styles.title}>📱 Managed Instagram Account</Text>
 
-      {/* Arama Kutusu */}
-      <TextInput style={styles.searchInput} placeholder="🔍 Search accounts..." />
-
-      {/* Yeni Hesap Ekle */}
-      <TouchableOpacity style={styles.addButton}>
-        <Text style={styles.addButtonText}>➕ Add New Account</Text>
-      </TouchableOpacity>
-
-      {/* Hesap Listesi */}
-      <FlatList
-        data={dummyAccounts}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>{item.name}</Text>
-            <Text style={styles.cardSubtitle}>Manager: {item.manager}</Text>
-            <Text style={styles.cardFollowers}>Followers: {item.followers}</Text>
-            <View style={styles.cardActions}>
-              <TouchableOpacity style={styles.editButton}>
-                <Text>📄 Details</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.editButton}>
-                <Text>✏️ Edit</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.deleteButton}>
-                <Text>🗑️ Delete</Text>
-              </TouchableOpacity>
-            </View>
+      {accountInfo ? (
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>{accountInfo.name}</Text>
+          <View style={styles.infoRow}>
+            <Text style={styles.detailLabel}>Instagram User ID:</Text>
+            <Text style={styles.cardDetailValue}>{accountInfo.instagramUserId || accountInfo.id}</Text>
           </View>
-        )}
-        contentContainerStyle={{ paddingBottom: 20 }}
-      />
+          <View style={styles.infoRow}>
+            <Text style={styles.detailLabel}>Assigned Manager:</Text>
+            <Text style={styles.cardDetailValue}>{accountInfo.managerName || 'N/A'}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.detailLabel}>Assigned Content Creator:</Text>
+            <Text style={styles.cardDetailValue}>{accountInfo.creatorName || 'N/A'}</Text>
+          </View>
+        </View>
+      ) : (
+        <View style={styles.centered}>
+          <Text style={styles.noDataText}>
+            No account information to display.
+          </Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -58,79 +110,85 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 80,
-    backgroundColor: '#fff',
+    paddingTop: Platform.OS === 'ios' ? 90 : 70,
+    backgroundColor: '#f8f9fa',
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   homeButton: {
     position: 'absolute',
-    top: 40,
+    top: Platform.OS === 'ios' ? 50 : 30,
     left: 20,
-    padding: 10,
-    backgroundColor: '#eee',
-    borderRadius: 8,
+    paddingVertical: 10, // Artırdım
+    paddingHorizontal: 15, // Artırdım
+    backgroundColor: '#e9ecef',
+    borderRadius: 25, // Daha yuvarlak
+    zIndex: 1,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   homeButtonText: {
     fontSize: 16,
-    color: '#333',
+    color: '#495057',
+    fontWeight: '600', // Biraz daha kalın
   },
   title: {
-    fontSize: 28,
+    fontSize: 26, // Başlığı büyüttüm
     fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  searchInput: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  addButton: {
-    backgroundColor: '#4C7CFF',
-    padding: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  addButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
+    marginBottom: 30,
+    color: '#1e293b',
+    textAlign: 'center',
   },
   card: {
-    backgroundColor: '#f9f9f9',
-    padding: 15,
-    marginBottom: 12,
-    borderRadius: 10,
+    backgroundColor: '#ffffff',
+    padding: 25,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: '#dee2e6', // Daha yumuşak border
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4, }, // Gölgeyi artırdım
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
   },
   cardTitle: {
-    fontSize: 18,
+    fontSize: 22, // Hesap adı daha büyük
     fontWeight: 'bold',
+    color: '#007bff', // Marka rengiyle uyumlu
+    marginBottom: 20,
+    textAlign: 'center',
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e9ecef',
   },
-  cardSubtitle: {
-    fontSize: 14,
-    color: '#555',
-    marginTop: 2,
-  },
-  cardFollowers: {
-    fontSize: 14,
-    marginTop: 5,
-    fontWeight: '500',
-    color: '#333',
-  },
-  cardActions: {
+  infoRow: { // Her bir bilgi satırı için
     flexDirection: 'row',
-    marginTop: 10,
     justifyContent: 'space-between',
+    marginBottom: 12,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f1f1',
   },
-  editButton: {
-    backgroundColor: '#eee',
-    padding: 8,
-    borderRadius: 6,
+  detailLabel: { // "Manager:", "Content Creator:" gibi etiketler
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#495057', // Biraz daha koyu
   },
-  deleteButton: {
-    backgroundColor: '#ffcccc',
-    padding: 8,
-    borderRadius: 6,
+  cardDetailValue: { // Asıl değer (isim, ID)
+    fontSize: 16,
+    color: '#343a40', // Değerler için daha koyu
+    textAlign: 'right', // Sağa yaslı
+    flexShrink: 1, // Uzunsa sığması için
+  },
+  noDataText: {
+    fontSize: 17, // Biraz daha büyük
+    color: '#6c757d',
+    textAlign: 'center',
   },
 });

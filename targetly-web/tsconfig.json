@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "target": "es5", // veya "es6", "esnext"
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react", // <<<--- BU SATIRI "react" OLARAK GÜNCELLEDİK
+    "types": ["node", "jest"] // Eğer varsa
+    // ... diğer compilerOptions ayarlarınız
+  },
+  "include": [
+    "src" // Genellikle React projelerinde kaynak dosyalar src klasöründedir
+  ]
+  // "exclude": ["node_modules"] // Genellikle varsayılan olarak dışlanır
+}
